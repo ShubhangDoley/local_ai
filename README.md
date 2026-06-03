@@ -10,18 +10,18 @@ The system operates in two distinct modes:
 
 ```mermaid
 graph TD
-    subgraph Mobile App (Flutter Frontend)
+    subgraph "Mobile App (Flutter Frontend)"
         UI[Chat Interface]
         MM[Model Manager]
         PM[Provider State]
     end
 
-    subgraph Offline Mode (On-Device)
+    subgraph "Offline Mode (On-Device)"
         Engine[LiteRT-LM Engine]
         Models[(Local .task/.litertlm Files)]
     end
 
-    subgraph Online Mode (Remote Backend)
+    subgraph "Online Mode (Remote Backend)"
         API[FastAPI Server]
         Ollama[Ollama Instance]
     end
