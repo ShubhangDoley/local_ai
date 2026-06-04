@@ -44,4 +44,6 @@ app.*.map.json
 /android/app/profile
 /android/app/release
 
-.vscode
+.vscode/
+
+local_ai_app_icon-removebg-preview.png
