@@ -9,8 +9,10 @@ import '../db/db_helper.dart';
 
 // Set this to your development machine's IP and port so a physical phone can reach the backend.
 // Example: '192.168.1.42:8000' or '10.0.0.5:8000'
-const String backendHost = '10.176.41.41:8000';
-
+const String backendHost = String.fromEnvironment(
+  'BACKEND_URL',
+  defaultValue: '',
+);
 enum ChatRole { user, assistant }
 
 class ChatMessage {
