@@ -52,7 +52,7 @@ class _HomepageState extends State<Homepage> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Chat history is already empty.'),
-          backgroundColor: Color(0xFF1E293B),
+          backgroundColor: Color(0xFF1C1C1E),
         ),
       );
       return;
@@ -61,16 +61,20 @@ class _HomepageState extends State<Homepage> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: const Color(0xFF0F172A),
-        title: const Text('Clear Chat History?', style: TextStyle(color: Colors.white)),
+        backgroundColor: const Color(0xFF0D0D0D),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+          side: const BorderSide(color: Color(0xFF262626), width: 1),
+        ),
+        title: const Text('Clear Chat History?', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
         content: const Text(
-          'Are you sure you want to permanently delete all messages? This action cannot be undone.',
-          style: TextStyle(color: Color(0xFF94A3B8)),
+          'Are you sure you want to permanently delete all messages?',
+          style: TextStyle(color: Color(0xFF8E8E93)),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel', style: TextStyle(color: Color(0xFF94A3B8))),
+            child: const Text('Cancel', style: TextStyle(color: Color(0xFF8E8E93))),
           ),
           TextButton(
             onPressed: () {
@@ -79,11 +83,11 @@ class _HomepageState extends State<Homepage> {
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
                   content: Text('Chat history cleared.'),
-                  backgroundColor: Color(0xFF10B981),
+                  backgroundColor: Color(0xFF1C1C1E),
                 ),
               );
             },
-            child: const Text('Clear All', style: TextStyle(color: Color(0xFFEF4444))),
+            child: const Text('Clear All', style: TextStyle(color: Color(0xFFFF453A))),
           ),
         ],
       ),
@@ -109,7 +113,14 @@ class _HomepageState extends State<Homepage> {
           appBar: AppBar(
             titleSpacing: 16,
             elevation: 0,
-            backgroundColor: const Color(0xFF020617),
+            backgroundColor: Colors.black,
+            bottom: PreferredSize(
+              preferredSize: const Size.fromHeight(1.0),
+              child: Container(
+                color: const Color(0xFF1C1C1E),
+                height: 1.0,
+              ),
+            ),
             title: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
@@ -117,20 +128,21 @@ class _HomepageState extends State<Homepage> {
                   'Local AI Chat',
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
-                    fontSize: 18,
+                    fontSize: 16,
                     color: Colors.white,
+                    letterSpacing: -0.3,
                   ),
                 ),
                 const SizedBox(height: 2),
                 Row(
                   children: [
                     Container(
-                      width: 8,
-                      height: 8,
+                      width: 6,
+                      height: 6,
                       decoration: BoxDecoration(
                         color: isLocal 
-                            ? (activeModel != null ? const Color(0xFF0EA5E9) : const Color(0xFFEF4444)) 
-                            : const Color(0xFF10B981),
+                            ? (activeModel != null ? Colors.white : const Color(0xFFFF453A)) 
+                            : const Color(0xFF30D158),
                         shape: BoxShape.circle,
                       ),
                     ),
@@ -139,9 +151,9 @@ class _HomepageState extends State<Homepage> {
                       isLocal 
                           ? (activeModel != null ? 'Local: ${activeModel.name}' : 'Local: No Active Model') 
                           : 'Online (Backend)',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: isLocal ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                      style: const TextStyle(
+                        fontSize: 11,
+                        color: Color(0xFF8E8E93),
                         fontWeight: FontWeight.w500,
                       ),
                     ),
@@ -151,16 +163,16 @@ class _HomepageState extends State<Homepage> {
             ),
             actions: [
               IconButton(
-                icon: const Icon(Icons.delete_sweep_rounded),
-                color: const Color(0xFFEF4444),
-                iconSize: 26,
+                icon: const Icon(Icons.delete_outline_rounded),
+                color: const Color(0xFF8E8E93),
+                iconSize: 22,
                 onPressed: () => _confirmClearChat(context, provider),
                 tooltip: 'Clear Chat History',
               ),
               IconButton(
-                icon: const Icon(Icons.settings_suggest_rounded),
-                color: const Color(0xFF0EA5E9),
-                iconSize: 26,
+                icon: const Icon(Icons.tune_rounded),
+                color: Colors.white,
+                iconSize: 22,
                 onPressed: () => ModelListDialog.show(context),
                 tooltip: 'Model Manager',
               ),
@@ -168,13 +180,7 @@ class _HomepageState extends State<Homepage> {
             ],
           ),
           body: Container(
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                colors: <Color>[Color(0xFF020617), Color(0xFF0F172A)],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-            ),
+            color: Colors.black,
             child: SafeArea(
               child: Column(
                 children: <Widget>[
@@ -184,14 +190,14 @@ class _HomepageState extends State<Homepage> {
                         : ListView.builder(
                             controller: _scrollController,
                             padding: const EdgeInsets.symmetric(
-                              horizontal: 14,
+                              horizontal: 16,
                               vertical: 16,
                             ),
                             itemCount:
                                 provider.messages.length + (provider.isSending ? 1 : 0),
                             itemBuilder: (BuildContext context, int index) {
                               if (index >= provider.messages.length) {
-                                return const _TypingBubble();
+                                  return const _TypingBubble();
                               }
 
                               final ChatMessage message = provider.messages[index];
@@ -218,37 +224,47 @@ class _HomepageState extends State<Homepage> {
   Widget _buildEmptyState(bool isLocal, LocalModel? activeModel) {
     return Center(
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 32.0),
+        padding: const EdgeInsets.symmetric(horizontal: 40.0),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              isLocal ? Icons.offline_bolt_rounded : Icons.cloud_done_rounded,
-              size: 64,
-              color: const Color(0xFF1E293B),
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: const Color(0xFF0D0D0D),
+                shape: BoxShape.circle,
+                border: Border.all(color: const Color(0xFF1C1C1E)),
+              ),
+              child: Icon(
+                isLocal ? Icons.terminal_rounded : Icons.offline_bolt_outlined,
+                size: 32,
+                color: const Color(0xFF8E8E93),
+              ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 20),
             Text(
               isLocal 
-                  ? (activeModel != null ? 'Local Session Ready' : 'Select a Model') 
-                  : 'Connected to Backend AI',
+                  ? (activeModel != null ? 'Local Instance Active' : 'Model Required') 
+                  : 'Connected to Cloud',
               style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                color: Color(0xFF64748B),
+                fontSize: 15,
+                fontWeight: FontWeight.w600,
+                color: Colors.white,
+                letterSpacing: -0.2,
               ),
             ),
             const SizedBox(height: 8),
             Text(
               isLocal 
                   ? (activeModel != null 
-                      ? 'You are running ${activeModel.name} completely on-device. No internet required!' 
-                      : 'Open the Model Manager (top-right icon) to download and select a local model.')
-                  : 'Messages will be forwarded to your fastapi backend running Ollama.',
+                      ? 'Running ${activeModel.name} on-device. Your conversations are secure and private.' 
+                      : 'Open the Model Manager (top-right control) to configure a local LLM.')
+                  : 'Forwarding messages to your FastAPI server running Ollama / NIM.',
               textAlign: TextAlign.center,
               style: const TextStyle(
                 fontSize: 13,
-                color: Color(0xFF475569),
+                color: Color(0xFF8E8E93),
+                height: 1.4,
               ),
             ),
           ],
@@ -276,10 +292,10 @@ class _InputBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.fromLTRB(14, 10, 14, 14),
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
       decoration: const BoxDecoration(
-        color: Color(0xFF090D1A),
-        border: Border(top: BorderSide(color: Color(0xFF1E293B))),
+        color: Colors.black,
+        border: Border(top: BorderSide(color: Color(0xFF1C1C1E))),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.end,
@@ -289,49 +305,49 @@ class _InputBar extends StatelessWidget {
               controller: controller,
               onChanged: onChanged,
               minLines: 1,
-              maxLines: 5,
+              maxLines: 6,
               textInputAction: TextInputAction.send,
               onSubmitted: (_) => onSend(),
-              style: const TextStyle(color: Colors.white),
+              style: const TextStyle(color: Colors.white, fontSize: 15),
               decoration: InputDecoration(
-                hintText: isLocalMode ? 'Message local AI...' : 'Message backend AI...',
-                hintStyle: const TextStyle(color: Color(0xFF475569)),
+                hintText: isLocalMode ? 'Message local model...' : 'Message backend...',
+                hintStyle: const TextStyle(color: Color(0xFF48484A), fontSize: 15),
                 filled: true,
-                fillColor: const Color(0xFF020617),
+                fillColor: const Color(0xFF0D0D0D),
                 border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(20),
-                  borderSide: const BorderSide(color: Color(0xFF1E293B)),
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: const BorderSide(color: Color(0xFF262626)),
                 ),
                 enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(20),
-                  borderSide: const BorderSide(color: Color(0xFF1E293B)),
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: const BorderSide(color: Color(0xFF262626)),
                 ),
                 focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(20),
-                  borderSide: const BorderSide(color: Color(0xFF0EA5E9), width: 1.5),
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: const BorderSide(color: Color(0xFF48484A)),
                 ),
                 contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 12,
+                  horizontal: 14,
+                  vertical: 11,
                 ),
               ),
             ),
           ),
           const SizedBox(width: 10),
           SizedBox(
-            height: 48,
-            width: 48,
-            child: FilledButton(
+            height: 44,
+            width: 44,
+            child: TextButton(
               onPressed: canSend ? onSend : null,
-              style: FilledButton.styleFrom(
+              style: TextButton.styleFrom(
                 padding: EdgeInsets.zero,
-                backgroundColor: const Color(0xFF0EA5E9),
-                foregroundColor: const Color(0xFF020617),
+                backgroundColor: canSend ? Colors.white : const Color(0xFF1C1C1E),
+                foregroundColor: canSend ? Colors.black : const Color(0xFF48484A),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
+                  borderRadius: BorderRadius.circular(10),
                 ),
               ),
-              child: const Icon(Icons.send_rounded),
+              child: const Icon(Icons.arrow_upward_rounded, size: 22),
             ),
           ),
         ],
@@ -352,31 +368,20 @@ class _MessageBubble extends StatelessWidget {
     return Align(
       alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
       child: Container(
-        constraints: const BoxConstraints(maxWidth: 580),
-        margin: const EdgeInsets.symmetric(vertical: 6),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        constraints: const BoxConstraints(maxWidth: 560),
+        margin: const EdgeInsets.symmetric(vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
         decoration: BoxDecoration(
-          color: isUser ? const Color(0xFF0EA5E9) : const Color(0xFF1E293B),
-          borderRadius: BorderRadius.only(
-            topLeft: const Radius.circular(18),
-            topRight: const Radius.circular(18),
-            bottomLeft: Radius.circular(isUser ? 18 : 4),
-            bottomRight: Radius.circular(isUser ? 4 : 18),
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.1),
-              blurRadius: 4,
-              offset: const Offset(0, 2),
-            ),
-          ],
+          color: isUser ? Colors.white : const Color(0xFF0D0D0D),
+          border: isUser ? null : Border.all(color: const Color(0xFF1C1C1E), width: 1),
+          borderRadius: BorderRadius.circular(12),
         ),
         child: Text(
           message.text.isEmpty ? '...' : message.text,
           style: TextStyle(
-            color: isUser ? const Color(0xFF020617) : const Color(0xFFF1F5F9),
-            fontSize: 15,
-            height: 1.4,
+            color: isUser ? Colors.black : const Color(0xFFE5E5E5),
+            fontSize: 14.5,
+            height: 1.45,
           ),
         ),
       ),
@@ -392,32 +397,28 @@ class _TypingBubble extends StatelessWidget {
     return Align(
       alignment: Alignment.centerLeft,
       child: Container(
-        margin: const EdgeInsets.symmetric(vertical: 6),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        margin: const EdgeInsets.symmetric(vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
         decoration: BoxDecoration(
-          color: const Color(0xFF1E293B).withOpacity(0.5),
-          borderRadius: const BorderRadius.only(
-            topLeft: Radius.circular(18),
-            topRight: Radius.circular(18),
-            bottomLeft: Radius.circular(4),
-            bottomRight: Radius.circular(18),
-          ),
+          color: const Color(0xFF0D0D0D),
+          border: Border.all(color: const Color(0xFF1C1C1E), width: 1),
+          borderRadius: BorderRadius.circular(12),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             const Text(
-              'Assistant is thinking',
-              style: TextStyle(color: Color(0xFF94A3B8), fontSize: 14),
+              'Thinking',
+              style: TextStyle(color: Color(0xFF8E8E93), fontSize: 13.5),
             ),
             const SizedBox(width: 8),
             SizedBox(
-              width: 14,
-              height: 14,
+              width: 12,
+              height: 12,
               child: CircularProgressIndicator(
-                strokeWidth: 2,
+                strokeWidth: 1.5,
                 valueColor: AlwaysStoppedAnimation<Color>(
-                  const Color(0xFF0EA5E9).withOpacity(0.7),
+                  const Color(0x99FFFFFF),
                 ),
               ),
             ),

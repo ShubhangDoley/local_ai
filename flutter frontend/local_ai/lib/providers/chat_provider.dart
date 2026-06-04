@@ -11,7 +11,7 @@ import '../db/db_helper.dart';
 // Example: '192.168.1.42:8000' or '10.0.0.5:8000'
 const String backendHost = String.fromEnvironment(
   'BACKEND_URL',
-  defaultValue: '',
+  defaultValue: '10.176.41.41:8000',
 );
 enum ChatRole { user, assistant }
 

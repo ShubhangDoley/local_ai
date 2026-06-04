@@ -38,11 +38,31 @@ class MyApp extends StatelessWidget {
         title: 'Local AI Chat',
         theme: ThemeData(
           useMaterial3: true,
-          colorScheme: ColorScheme.fromSeed(
-            seedColor: const Color(0xFF0EA5E9),
-            brightness: Brightness.dark,
+          brightness: Brightness.dark,
+          scaffoldBackgroundColor: Colors.black,
+          colorScheme: const ColorScheme.dark(
+            primary: Colors.white,
+            secondary: Color(0xFF262626),
+            surface: Color(0xFF0D0D0D),
+            onPrimary: Colors.black,
+            onSecondary: Colors.white,
+            onSurface: Colors.white,
           ),
-          scaffoldBackgroundColor: const Color(0xFF020617),
+          appBarTheme: const AppBarTheme(
+            backgroundColor: Colors.black,
+            elevation: 0,
+            iconTheme: IconThemeData(color: Colors.white),
+            titleTextStyle: TextStyle(
+              color: Colors.white,
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          dialogTheme: const DialogThemeData(
+            backgroundColor: Color(0xFF0D0D0D),
+            titleTextStyle: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+            contentTextStyle: TextStyle(color: Color(0xFF8E8E93), fontSize: 14),
+          ),
         ),
         home: const Homepage(),
       ),

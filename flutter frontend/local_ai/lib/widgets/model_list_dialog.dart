@@ -22,10 +22,10 @@ class ModelListDialog extends StatelessWidget {
     return Container(
       height: MediaQuery.of(context).size.height * 0.8,
       decoration: const BoxDecoration(
-        color: Color(0xFF0F172A),
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        color: Color(0xFF0F0F0F),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
         border: Border(
-          top: BorderSide(color: Color(0xFF334155), width: 1.5),
+          top: BorderSide(color: Color(0xFF262626), width: 1.0),
         ),
       ),
       child: Column(
@@ -33,10 +33,10 @@ class ModelListDialog extends StatelessWidget {
           // Drag handle
           Container(
             margin: const EdgeInsets.symmetric(vertical: 12),
-            width: 40,
+            width: 36,
             height: 4,
             decoration: BoxDecoration(
-              color: const Color(0xFF475569),
+              color: const Color(0xFF262626),
               borderRadius: BorderRadius.circular(2),
             ),
           ),
@@ -55,9 +55,10 @@ class ModelListDialog extends StatelessWidget {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
-                          fontSize: 20,
+                          fontSize: 18,
                           fontWeight: FontWeight.bold,
                           color: Colors.white,
+                          letterSpacing: -0.3,
                         ),
                       ),
                       const SizedBox(height: 4),
@@ -65,9 +66,9 @@ class ModelListDialog extends StatelessWidget {
                         isLocal ? 'Offline (On-Device AI)' : 'Online (Backend AI)',
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          fontSize: 13,
-                          color: isLocal ? const Color(0xFF0EA5E9) : const Color(0xFF94A3B8),
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: Color(0xFF8E8E93),
                         ),
                       ),
                     ],
@@ -81,18 +82,18 @@ class ModelListDialog extends StatelessWidget {
                     Text(
                       'Local Mode',
                       style: TextStyle(
-                        fontSize: 14,
+                        fontSize: 13,
                         fontWeight: FontWeight.w500,
-                        color: isLocal ? Colors.white : const Color(0xFF64748B),
+                        color: isLocal ? Colors.white : const Color(0xFF48484A),
                       ),
                     ),
                     const SizedBox(width: 8),
                     Switch(
                       value: isLocal,
-                      activeThumbColor: const Color(0xFF0EA5E9),
-                      activeTrackColor: const Color(0xFF083344),
-                      inactiveThumbColor: const Color(0xFF94A3B8),
-                      inactiveTrackColor: const Color(0xFF1E293B),
+                      activeThumbColor: Colors.black,
+                      activeTrackColor: Colors.white,
+                      inactiveThumbColor: const Color(0xFF48484A),
+                      inactiveTrackColor: const Color(0xFF1C1C1E),
                       onChanged: (val) {
                         modelProvider.setLocalMode(val);
                       },
@@ -102,7 +103,7 @@ class ModelListDialog extends StatelessWidget {
               ],
             ),
           ),
-          const Divider(color: Color(0xFF1E293B), height: 24),
+          const Divider(color: Color(0xFF1C1C1E), height: 24),
 
           // Models List
           Expanded(
@@ -116,17 +117,17 @@ class ModelListDialog extends StatelessWidget {
                 final isActive = modelProvider.activeModel?.id == model.id;
 
                 return Container(
-                  margin: const EdgeInsets.only(bottom: 14),
+                  margin: const EdgeInsets.only(bottom: 12),
                   decoration: BoxDecoration(
                     color: isActive 
-                        ? const Color(0xFF0F2B48).withOpacity(0.4) 
-                        : const Color(0xFF1E293B).withOpacity(0.5),
-                    borderRadius: BorderRadius.circular(16),
+                        ? const Color(0xFF161616) 
+                        : const Color(0xFF0D0D0D),
+                    borderRadius: BorderRadius.circular(12),
                     border: Border.all(
                       color: isActive 
-                          ? const Color(0xFF0EA5E9) 
-                          : const Color(0xFF334155).withOpacity(0.5),
-                      width: isActive ? 1.5 : 1.0,
+                          ? Colors.white 
+                          : const Color(0xFF262626),
+                      width: 1.0,
                     ),
                   ),
                   child: Padding(
@@ -142,7 +143,7 @@ class ModelListDialog extends StatelessWidget {
                               child: Text(
                                 model.name,
                                 style: const TextStyle(
-                                  fontSize: 16,
+                                  fontSize: 15,
                                   fontWeight: FontWeight.bold,
                                   color: Colors.white,
                                 ),
@@ -150,20 +151,21 @@ class ModelListDialog extends StatelessWidget {
                             ),
                             Container(
                               padding: const EdgeInsets.symmetric(
-                                horizontal: 10,
-                                vertical: 4,
+                                horizontal: 8,
+                                vertical: 3,
                               ),
                               decoration: BoxDecoration(
-                                color: const Color(0xFF0F172A),
-                                borderRadius: BorderRadius.circular(12),
-                                border: Border.all(color: const Color(0xFF334155)),
+                                color: Colors.black,
+                                borderRadius: BorderRadius.circular(6),
+                                border: Border.all(color: const Color(0xFF262626)),
                               ),
                               child: Text(
-                                model.specialty,
+                                model.specialty.toUpperCase(),
                                 style: const TextStyle(
-                                  fontSize: 11,
-                                  color: Color(0xFF38BDF8),
-                                  fontWeight: FontWeight.w600,
+                                  fontSize: 9,
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                  letterSpacing: 0.5,
                                 ),
                               ),
                             ),
@@ -175,8 +177,8 @@ class ModelListDialog extends StatelessWidget {
                         Text(
                           model.description,
                           style: const TextStyle(
-                            fontSize: 13,
-                            color: Color(0xFF94A3B8),
+                            fontSize: 12.5,
+                            color: Color(0xFF8E8E93),
                             height: 1.35,
                           ),
                         ),
@@ -208,26 +210,26 @@ class ModelListDialog extends StatelessWidget {
       case DownloadStatus.notDownloaded:
         return SizedBox(
           width: double.infinity,
-          height: 40,
+          height: 38,
           child: OutlinedButton(
             style: OutlinedButton.styleFrom(
-              side: const BorderSide(color: Color(0xFF0EA5E9)),
+              side: const BorderSide(color: Colors.white),
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
+                borderRadius: BorderRadius.circular(8),
               ),
-              foregroundColor: const Color(0xFF0EA5E9),
+              foregroundColor: Colors.white,
             ),
             onPressed: () => provider.downloadModel(model),
             child: const Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.download_rounded, size: 18),
+                Icon(Icons.download_rounded, size: 16),
                 SizedBox(width: 6),
                 Flexible(
                   child: Text(
                     'Download Model (1-2 GB)',
                     overflow: TextOverflow.ellipsis,
-                    style: TextStyle(fontSize: 13),
+                    style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
                   ),
                 ),
               ],
@@ -244,22 +246,22 @@ class ModelListDialog extends StatelessWidget {
               children: [
                 const Text(
                   'Downloading...',
-                  style: TextStyle(color: Color(0xFF38BDF8), fontSize: 12),
+                  style: TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.w500),
                 ),
                 Text(
                   '${(progress * 100).toStringAsFixed(1)}%',
-                  style: const TextStyle(color: Color(0xFF38BDF8), fontSize: 12, fontWeight: FontWeight.bold),
+                  style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold),
                 ),
               ],
             ),
             const SizedBox(height: 6),
             ClipRRect(
-              borderRadius: BorderRadius.circular(4),
+              borderRadius: BorderRadius.circular(2),
               child: LinearProgressIndicator(
                 value: progress,
-                backgroundColor: const Color(0xFF1E293B),
-                color: const Color(0xFF0EA5E9),
-                minHeight: 6,
+                backgroundColor: const Color(0xFF1C1C1E),
+                color: Colors.white,
+                minHeight: 4,
               ),
             ),
           ],
@@ -272,19 +274,19 @@ class ModelListDialog extends StatelessWidget {
             if (isActive)
               Expanded(
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
                   child: const Row(
                     children: [
-                      Icon(Icons.check_circle_rounded, color: Color(0xFF10B981), size: 18),
+                      Icon(Icons.check_circle_rounded, color: Colors.white, size: 16),
                       SizedBox(width: 6),
                       Expanded(
                         child: Text(
-                          'Selected & Active',
+                          'Active',
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
-                            color: Color(0xFF10B981),
-                            fontWeight: FontWeight.w600,
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
                             fontSize: 13,
                           ),
                         ),
@@ -296,45 +298,50 @@ class ModelListDialog extends StatelessWidget {
             else
               Expanded(
                 child: SizedBox(
-                  height: 40,
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF1E293B),
+                  height: 38,
+                  child: TextButton(
+                    style: TextButton.styleFrom(
+                      backgroundColor: const Color(0xFF1C1C1E),
                       foregroundColor: Colors.white,
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                        side: const BorderSide(color: Color(0xFF334155)),
+                        borderRadius: BorderRadius.circular(8),
+                        side: const BorderSide(color: Color(0xFF262626)),
                       ),
                     ),
                     onPressed: () => provider.setActiveModel(model),
-                    child: const Text('Use this model', style: TextStyle(fontSize: 13)),
+                    child: const Text('Use this model', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
                   ),
                 ),
               ),
+            const SizedBox(width: 8),
             IconButton(
-              icon: const Icon(Icons.delete_outline_rounded, color: Color(0xFFEF4444)),
+              icon: const Icon(Icons.delete_outline_rounded, color: Color(0xFFFF453A)),
               tooltip: 'Delete Model',
               onPressed: () {
                 showDialog(
                   context: context,
                   builder: (context) => AlertDialog(
-                    backgroundColor: const Color(0xFF0F172A),
-                    title: const Text('Delete Model?', style: TextStyle(color: Colors.white)),
+                    backgroundColor: const Color(0xFF0D0D0D),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      side: const BorderSide(color: Color(0xFF262626)),
+                    ),
+                    title: const Text('Delete Model?', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
                     content: Text(
                       'Are you sure you want to delete ${model.name}? This will free up storage space.',
-                      style: const TextStyle(color: Color(0xFF94A3B8)),
+                      style: const TextStyle(color: Color(0xFF8E8E93)),
                     ),
                     actions: [
                       TextButton(
                         onPressed: () => Navigator.pop(context),
-                        child: const Text('Cancel', style: TextStyle(color: Color(0xFF94A3B8))),
+                        child: const Text('Cancel', style: TextStyle(color: Color(0xFF8E8E93))),
                       ),
                       TextButton(
                         onPressed: () {
                           provider.deleteModel(model);
                           Navigator.pop(context);
                         },
-                        child: const Text('Delete', style: TextStyle(color: Color(0xFFEF4444))),
+                        child: const Text('Delete', style: TextStyle(color: Color(0xFFFF453A))),
                       ),
                     ],
                   ),
@@ -350,11 +357,11 @@ class ModelListDialog extends StatelessWidget {
             const Expanded(
               child: Text(
                 'Download failed',
-                style: TextStyle(color: Color(0xFFEF4444), fontSize: 13),
+                style: TextStyle(color: Color(0xFFFF453A), fontSize: 12),
               ),
             ),
             IconButton(
-              icon: const Icon(Icons.replay_rounded, color: Color(0xFF0EA5E9)),
+              icon: const Icon(Icons.replay_rounded, color: Colors.white),
               onPressed: () => provider.downloadModel(model),
             ),
           ],
