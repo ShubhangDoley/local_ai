@@ -47,6 +47,49 @@ class _HomepageState extends State<Homepage> {
     );
   }
 
+  void _confirmClearChat(BuildContext context, ChatProvider provider) {
+    if (provider.messages.length <= 1 && provider.messages.first.role == ChatRole.assistant) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Chat history is already empty.'),
+          backgroundColor: Color(0xFF1E293B),
+        ),
+      );
+      return;
+    }
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: const Color(0xFF0F172A),
+        title: const Text('Clear Chat History?', style: TextStyle(color: Colors.white)),
+        content: const Text(
+          'Are you sure you want to permanently delete all messages? This action cannot be undone.',
+          style: TextStyle(color: Color(0xFF94A3B8)),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel', style: TextStyle(color: Color(0xFF94A3B8))),
+          ),
+          TextButton(
+            onPressed: () {
+              provider.clearChatHistory();
+              Navigator.pop(context);
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Chat history cleared.'),
+                  backgroundColor: Color(0xFF10B981),
+                ),
+              );
+            },
+            child: const Text('Clear All', style: TextStyle(color: Color(0xFFEF4444))),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final modelProvider = Provider.of<ModelProvider>(context);
@@ -107,6 +150,13 @@ class _HomepageState extends State<Homepage> {
               ],
             ),
             actions: [
+              IconButton(
+                icon: const Icon(Icons.delete_sweep_rounded),
+                color: const Color(0xFFEF4444),
+                iconSize: 26,
+                onPressed: () => _confirmClearChat(context, provider),
+                tooltip: 'Clear Chat History',
+              ),
               IconButton(
                 icon: const Icon(Icons.settings_suggest_rounded),
                 color: const Color(0xFF0EA5E9),

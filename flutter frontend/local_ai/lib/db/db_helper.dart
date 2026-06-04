@@ -38,4 +38,19 @@ class DbHelper {
       },
     );
   }
+
+  Future<int> insertMessage(Map<String, dynamic> msgMap) async {
+    final db = await getDB();
+    return await db.insert(tableName, msgMap);
+  }
+
+  Future<List<Map<String, dynamic>>> getAllMessages() async {
+    final db = await getDB();
+    return await db.query(tableName, orderBy: 'id ASC');
+  }
+
+  Future<int> clearAllMessages() async {
+    final db = await getDB();
+    return await db.delete(tableName);
+  }
 }

@@ -5,10 +5,11 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_gemma/flutter_gemma.dart';
 
 import 'model_provider.dart';
+import '../db/db_helper.dart';
 
 // Set this to your development machine's IP and port so a physical phone can reach the backend.
 // Example: '192.168.1.42:8000' or '10.0.0.5:8000'
-const String backendHost = '172.19.161.41:8000';
+const String backendHost = '10.176.41.41:8000';
 
 enum ChatRole { user, assistant }
 
@@ -19,6 +20,22 @@ class ChatMessage {
   final String text;
   final ChatRole role;
   final DateTime timestamp;
+
+  Map<String, dynamic> toMap() {
+    return {
+      'text': text,
+      'role': role.name,
+      'timestamp': timestamp.toIso8601String(),
+    };
+  }
+
+  factory ChatMessage.fromMap(Map<String, dynamic> map) {
+    return ChatMessage(
+      text: map['text'] as String,
+      role: ChatRole.values.byName(map['role'] as String),
+      timestamp: DateTime.parse(map['timestamp'] as String),
+    );
+  }
 }
 
 class ChatProvider extends ChangeNotifier {
@@ -41,6 +58,39 @@ class ChatProvider extends ChangeNotifier {
   bool get isSending => _isSending;
   bool get canSend => _currentInput.trim().isNotEmpty && !_isSending;
 
+  ChatProvider() {
+    _loadMessages();
+  }
+
+  Future<void> _loadMessages() async {
+    try {
+      final List<Map<String, dynamic>> maps = await DbHelper.getInstance.getAllMessages();
+      if (maps.isNotEmpty) {
+        _messages.clear();
+        _messages.addAll(maps.map((m) => ChatMessage.fromMap(m)).toList());
+        notifyListeners();
+      }
+    } catch (e) {
+      debugPrint('Error loading messages from SQLite: $e');
+    }
+  }
+
+  Future<void> clearChatHistory() async {
+    try {
+      await DbHelper.getInstance.clearAllMessages();
+      _messages.clear();
+      _messages.add(
+        ChatMessage(
+          text: 'Tell me what you want to build and I will help.',
+          role: ChatRole.assistant,
+        ),
+      );
+      notifyListeners();
+    } catch (e) {
+      debugPrint('Error clearing chat history: $e');
+    }
+  }
+
   void updateModelProvider(ModelProvider modelProvider) {
     _modelProvider = modelProvider;
   }
@@ -56,23 +106,34 @@ class ChatProvider extends ChangeNotifier {
       return;
     }
 
-    _messages.add(ChatMessage(text: sanitizedText, role: ChatRole.user));
+    final userMessage = ChatMessage(text: sanitizedText, role: ChatRole.user);
+    _messages.add(userMessage);
     _currentInput = '';
     _isSending = true;
     notifyListeners();
+
+    // Save user message to database immediately
+    try {
+      await DbHelper.getInstance.insertMessage(userMessage.toMap());
+    } catch (e) {
+      debugPrint('Failed to save user message: $e');
+    }
 
     // Check if Local AI is active and configured
     if (_modelProvider != null && _modelProvider!.isLocalMode) {
       final activeModel = _modelProvider!.activeModel;
       if (activeModel == null) {
-        _messages.add(
-          ChatMessage(
-            text: 'No local model downloaded/selected. Please download and select a model first.',
-            role: ChatRole.assistant,
-          ),
+        final errorMsg = ChatMessage(
+          text: 'No local model downloaded/selected. Please download and select a model first.',
+          role: ChatRole.assistant,
         );
+        _messages.add(errorMsg);
         _isSending = false;
         notifyListeners();
+        
+        try {
+          await DbHelper.getInstance.insertMessage(errorMsg.toMap());
+        } catch (_) {}
         return;
       }
 
@@ -144,13 +205,26 @@ class ChatProvider extends ChangeNotifier {
             notifyListeners();
           }
         }
-      } catch (e) {
-        _messages.add(
-          ChatMessage(
-            text: 'On-device AI failed: ${e.toString()}',
-            role: ChatRole.assistant,
-          ),
+
+        // Save complete local model response to database
+        final finalAssistantMsg = ChatMessage(
+          text: buffer.toString(),
+          role: ChatRole.assistant,
+          timestamp: assistantMessagePlaceholder.timestamp,
         );
+        try {
+          await DbHelper.getInstance.insertMessage(finalAssistantMsg.toMap());
+        } catch (_) {}
+
+      } catch (e) {
+        final errorMsg = ChatMessage(
+          text: 'On-device AI failed: ${e.toString()}',
+          role: ChatRole.assistant,
+        );
+        _messages.add(errorMsg);
+        try {
+          await DbHelper.getInstance.insertMessage(errorMsg.toMap());
+        } catch (_) {}
       } finally {
         _isSending = false;
         notifyListeners();
@@ -161,16 +235,29 @@ class ChatProvider extends ChangeNotifier {
     // Backend AI Flow
     try {
       final String assistantReply = await sendMessageToBackend(sanitizedText);
-      _messages.add(
-        ChatMessage(text: assistantReply, role: ChatRole.assistant),
-      );
+      final replyMsg = ChatMessage(text: assistantReply, role: ChatRole.assistant);
+      _messages.add(replyMsg);
+      
+      // Save backend response to database
+      try {
+        await DbHelper.getInstance.insertMessage(replyMsg.toMap());
+      } catch (_) {}
     } catch (e) {
-      _messages.add(
-        ChatMessage(
-          text: 'I could not reach the backend AI. ${e.toString()}',
-          role: ChatRole.assistant,
-        ),
+      String errorText = 'I could not reach the backend AI: ${e.toString()}';
+      if (e is TimeoutException) {
+        errorText = 'Failed to connect: AI response timed out after 60 seconds. Please check if the backend server is running.';
+      } else if (e.toString().contains('SocketException') || e.toString().contains('Connection refused') || e.toString().contains('Connection failed')) {
+        errorText = 'Failed to connect: Please make sure your server at $backendHost is running and accessible.';
+      }
+
+      final errorMsg = ChatMessage(
+        text: errorText,
+        role: ChatRole.assistant,
       );
+      _messages.add(errorMsg);
+      try {
+        await DbHelper.getInstance.insertMessage(errorMsg.toMap());
+      } catch (_) {}
     } finally {
       _isSending = false;
       notifyListeners();
@@ -178,10 +265,24 @@ class ChatProvider extends ChangeNotifier {
   }
 
   Future<String> sendMessageToBackend(String userInput) async {
+    String urlStr = backendHost;
+    if (!urlStr.startsWith('http://') && !urlStr.startsWith('https://')) {
+      urlStr = 'http://$urlStr';
+    }
+    // Remove trailing slash if present
+    if (urlStr.endsWith('/')) {
+      urlStr = urlStr.substring(0, urlStr.length - 1);
+    }
+    
     final response = await http.post(
-      Uri.parse('http://$backendHost/chat'),
+      Uri.parse('$urlStr/chat'),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({'prompt': userInput}),
+    ).timeout(
+      const Duration(seconds: 60),
+      onTimeout: () {
+        throw TimeoutException('AI response timed out after 60 seconds.');
+      },
     );
 
     if (response.statusCode != 200) {
